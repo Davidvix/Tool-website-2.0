@@ -1,32 +1,102 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice Generator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced Invoice Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
-    input, textarea, button { display: block; margin: 10px 0; padding: 8px; width: 100%; max-width: 500px; }
-    .output { white-space: pre-wrap; background: #f4f4f4; padding: 10px; margin-top: 10px; }
+    input, textarea, select, button {
+      display: block; margin: 10px 0; padding: 8px; width: 100%; max-width: 500px;
+    }
+    .invoice-box {
+      border: 1px solid #ccc; padding: 20px; max-width: 700px; margin-top: 20px;
+      background: #f9f9f9;
+    }
+    .section-title {
+      font-weight: bold; margin-top: 20px;
+    }
   </style>
 </head>
 <body>
-  <h2>🧾 Quick Invoice Generator</h2>
-  <input id="client" placeholder="Client Name" />
-  <input id="yourName" placeholder="Your Name" />
-  <textarea id="items" placeholder="Item list (e.g. Website Design - $500)"></textarea>
+  <h2>🧾 Advanced Invoice Generator</h2>
+
+  <label>Billing Name</label>
+  <input id="billingName" placeholder="e.g. John Doe" />
+  
+  <label>Billing Address</label>
+  <textarea id="billingAddress" placeholder="123 Main St, City, Country"></textarea>
+  
+  <label>Shipping Address</label>
+  <textarea id="shippingAddress" placeholder="123 Main St, City, Country"></textarea>
+  
+  <label>Items & Amounts (one per line, format: Item Name - Amount)</label>
+  <textarea id="items" placeholder="Logo Design - 300\nWebsite - 800"></textarea>
+  
+  <label>Currency</label>
+  <select id="currency">
+    <option value="$">USD ($)</option>
+    <option value="€">EUR (€)</option>
+    <option value="£">GBP (£)</option>
+  </select>
+
   <button onclick="generateInvoice()">Generate Invoice</button>
-  <div class="output" id="invoice-output"></div>
+  <button onclick="downloadPDF()" style="display:none;" id="downloadBtn">Download PDF</button>
+
+  <div id="invoiceOutput" class="invoice-box" style="display:none;"></div>
 
   <script>
     function generateInvoice() {
-      const client = document.getElementById('client').value;
-      const yourName = document.getElementById('yourName').value;
-      const items = document.getElementById('items').value;
+      const name = document.getElementById('billingName').value;
+      const billAddr = document.getElementById('billingAddress').value;
+      const shipAddr = document.getElementById('shippingAddress').value;
+      const itemsRaw = document.getElementById('items').value;
+      const currency = document.getElementById('currency').value;
       const date = new Date().toLocaleDateString();
-      const invoiceText = `Invoice\nDate: ${date}\nFrom: ${yourName}\nTo: ${client}\n\nItems:\n${items}\n\nThank you!`;
-      document.getElementById('invoice-output').textContent = invoiceText;
+
+      let lines = itemsRaw.split('\\n');
+      let itemRows = '';
+      let total = 0;
+
+      lines.forEach(line => {
+        const parts = line.split(' - ');
+        if (parts.length === 2) {
+          const item = parts[0];
+          const amount = parseFloat(parts[1]);
+          if (!isNaN(amount)) {
+            itemRows += `<tr><td>${item}</td><td style='text-align:right;'>${currency}${amount.toFixed(2)}</td></tr>`;
+            total += amount;
+          }
+        }
+      });
+
+      const html = `
+        <h3>Invoice</h3>
+        <p><strong>Date:</strong> ${date}</p>
+        <p class="section-title">Billed To:</p>
+        <p>${name}<br>${billAddr.replace(/\\n/g, '<br>')}</p>
+        <p class="section-title">Shipped To:</p>
+        <p>${shipAddr.replace(/\\n/g, '<br>')}</p>
+        <table style="width:100%; margin-top:20px;">
+          <thead>
+            <tr><th style="text-align:left;">Item</th><th style="text-align:right;">Amount</th></tr>
+          </thead>
+          <tbody>
+            ${itemRows}
+            <tr style="font-weight:bold;"><td>Total</td><td style="text-align:right;">${currency}${total.toFixed(2)}</td></tr>
+          </tbody>
+        </table>
+      `;
+
+      document.getElementById('invoiceOutput').innerHTML = html;
+      document.getElementById('invoiceOutput').style.display = 'block';
+      document.getElementById('downloadBtn').style.display = 'inline-block';
+    }
+
+    function downloadPDF() {
+      const element = document.getElementById('invoiceOutput');
+      html2pdf().from(element).save('invoice.pdf');
     }
   </script>
 </body>
