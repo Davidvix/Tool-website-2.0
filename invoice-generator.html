@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Advanced Invoice Generator</title>
+  <title>Professional Invoice Generator</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
@@ -11,29 +11,40 @@
       display: block; margin: 10px 0; padding: 8px; width: 100%; max-width: 500px;
     }
     .invoice-box {
-      border: 1px solid #ccc; padding: 20px; max-width: 700px; margin-top: 20px;
-      background: #f9f9f9;
+      font-family: 'Arial', sans-serif; color: #555; background: #fff;
+      border: 1px solid #eee; padding: 30px; margin-top: 30px; width: 100%;
+      max-width: 800px; box-shadow: 0 0 10px rgba(0,0,0,.15);
     }
-    .section-title {
-      font-weight: bold; margin-top: 20px;
-    }
+    table { width: 100%; line-height: inherit; text-align: left; border-collapse: collapse; }
+    table td { padding: 5px; vertical-align: top; }
+    table tr td:nth-child(2) { text-align: right; }
+    table tr.top table td { padding-bottom: 20px; }
+    table tr.information table td { padding-bottom: 40px; }
+    table tr.heading td { background: #eee; border-bottom: 1px solid #ddd; font-weight: bold; }
+    table tr.item td { border-bottom: 1px solid #eee; }
+    table tr.total td:nth-child(2) { font-weight: bold; border-top: 2px solid #eee; }
   </style>
 </head>
 <body>
-  <h2>🧾 Advanced Invoice Generator</h2>
+  <h2>🧾 Professional Invoice Generator</h2>
 
-  <label>Billing Name</label>
-  <input id="billingName" placeholder="e.g. John Doe" />
-  
-  <label>Billing Address</label>
-  <textarea id="billingAddress" placeholder="123 Main St, City, Country"></textarea>
-  
-  <label>Shipping Address</label>
-  <textarea id="shippingAddress" placeholder="123 Main St, City, Country"></textarea>
-  
-  <label>Items & Amounts (one per line, format: Item Name - Amount)</label>
-  <textarea id="items" placeholder="Logo Design - 300\nWebsite - 800"></textarea>
-  
+  <h4>Billing Address</h4>
+  <input id="billingName" placeholder="Name" />
+  <input id="billingStreet" placeholder="Street" />
+  <input id="billingPostcode" placeholder="Post Code" />
+  <input id="billingCity" placeholder="City" />
+  <input id="billingCountry" placeholder="Country" />
+
+  <h4>Shipping Address</h4>
+  <input id="shippingName" placeholder="Name" />
+  <input id="shippingStreet" placeholder="Street" />
+  <input id="shippingPostcode" placeholder="Post Code" />
+  <input id="shippingCity" placeholder="City" />
+  <input id="shippingCountry" placeholder="Country" />
+
+  <label>Items (one per line, format: Item - Amount)</label>
+  <textarea id="items" placeholder="Design - 200\nHosting - 100"></textarea>
+
   <label>Currency</label>
   <select id="currency">
     <option value="$">USD ($)</option>
@@ -47,17 +58,32 @@
   <div id="invoiceOutput" class="invoice-box" style="display:none;"></div>
 
   <script>
+    function formatAddress(name, street, postcode, city, country) {
+      return `<strong>${name}</strong><br>${street}<br>${postcode} ${city}<br>${country}`;
+    }
+
     function generateInvoice() {
-      const name = document.getElementById('billingName').value;
-      const billAddr = document.getElementById('billingAddress').value;
-      const shipAddr = document.getElementById('shippingAddress').value;
+      const billing = {
+        name: document.getElementById('billingName').value,
+        street: document.getElementById('billingStreet').value,
+        postcode: document.getElementById('billingPostcode').value,
+        city: document.getElementById('billingCity').value,
+        country: document.getElementById('billingCountry').value,
+      };
+      const shipping = {
+        name: document.getElementById('shippingName').value,
+        street: document.getElementById('shippingStreet').value,
+        postcode: document.getElementById('shippingPostcode').value,
+        city: document.getElementById('shippingCity').value,
+        country: document.getElementById('shippingCountry').value,
+      };
       const itemsRaw = document.getElementById('items').value;
       const currency = document.getElementById('currency').value;
       const date = new Date().toLocaleDateString();
 
-      let lines = itemsRaw.split('\\n');
       let itemRows = '';
       let total = 0;
+      const lines = itemsRaw.split('\n');
 
       lines.forEach(line => {
         const parts = line.split(' - ');
@@ -65,27 +91,50 @@
           const item = parts[0];
           const amount = parseFloat(parts[1]);
           if (!isNaN(amount)) {
-            itemRows += `<tr><td>${item}</td><td style='text-align:right;'>${currency}${amount.toFixed(2)}</td></tr>`;
+            itemRows += `<tr class='item'><td>${item}</td><td>${currency}${amount.toFixed(2)}</td></tr>`;
             total += amount;
           }
         }
       });
 
       const html = `
-        <h3>Invoice</h3>
-        <p><strong>Date:</strong> ${date}</p>
-        <p class="section-title">Billed To:</p>
-        <p>${name}<br>${billAddr.replace(/\\n/g, '<br>')}</p>
-        <p class="section-title">Shipped To:</p>
-        <p>${shipAddr.replace(/\\n/g, '<br>')}</p>
-        <table style="width:100%; margin-top:20px;">
-          <thead>
-            <tr><th style="text-align:left;">Item</th><th style="text-align:right;">Amount</th></tr>
-          </thead>
-          <tbody>
-            ${itemRows}
-            <tr style="font-weight:bold;"><td>Total</td><td style="text-align:right;">${currency}${total.toFixed(2)}</td></tr>
-          </tbody>
+        <table cellpadding="0" cellspacing="0">
+          <tr class="top">
+            <td colspan="2">
+              <table>
+                <tr>
+                  <td>
+                    <h2>INVOICE</h2>
+                  </td>
+                  <td>
+                    Date: ${date}<br>
+                    Invoice #: ${Math.floor(Math.random() * 100000)}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <tr class="information">
+            <td colspan="2">
+              <table>
+                <tr>
+                  <td>${formatAddress(billing.name, billing.street, billing.postcode, billing.city, billing.country)}</td>
+                  <td>${formatAddress(shipping.name, shipping.street, shipping.postcode, shipping.city, shipping.country)}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <tr class="heading">
+            <td>Item</td>
+            <td>Amount</td>
+          </tr>
+          ${itemRows}
+          <tr class="total">
+            <td></td>
+            <td>Total: ${currency}${total.toFixed(2)}</td>
+          </tr>
         </table>
       `;
 
