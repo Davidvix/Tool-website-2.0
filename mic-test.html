@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mic Test Tool</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    button { padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h2>🎤 Mic Test</h2>
+  <button onclick="startMicTest()">Start Mic Test</button>
+  <p id="mic-status">Status: Not started</p>
+  <audio id="mic-audio" controls style="display:none;"></audio>
+
+  <script>
+    function startMicTest() {
+      const status = document.getElementById('mic-status');
+      const audio = document.getElementById('mic-audio');
+
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          status.textContent = 'Status: Mic is working 🎧';
+          audio.srcObject = stream;
+          audio.style.display = 'block';
+          audio.play();
+        })
+        .catch(err => {
+          status.textContent = 'Status: Mic access denied ❌';
+        });
+    }
+  </script>
+</body>
+</html>

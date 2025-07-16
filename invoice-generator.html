@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, textarea, button { display: block; margin: 10px 0; padding: 8px; width: 100%; max-width: 500px; }
+    .output { white-space: pre-wrap; background: #f4f4f4; padding: 10px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>🧾 Quick Invoice Generator</h2>
+  <input id="client" placeholder="Client Name" />
+  <input id="yourName" placeholder="Your Name" />
+  <textarea id="items" placeholder="Item list (e.g. Website Design - $500)"></textarea>
+  <button onclick="generateInvoice()">Generate Invoice</button>
+  <div class="output" id="invoice-output"></div>
+
+  <script>
+    function generateInvoice() {
+      const client = document.getElementById('client').value;
+      const yourName = document.getElementById('yourName').value;
+      const items = document.getElementById('items').value;
+      const date = new Date().toLocaleDateString();
+      const invoiceText = `Invoice\nDate: ${date}\nFrom: ${yourName}\nTo: ${client}\n\nItems:\n${items}\n\nThank you!`;
+      document.getElementById('invoice-output').textContent = invoiceText;
+    }
+  </script>
+</body>
+</html>
