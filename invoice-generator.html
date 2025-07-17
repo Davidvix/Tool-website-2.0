@@ -103,9 +103,7 @@
             <td colspan="2">
               <table>
                 <tr>
-                  <td>
-                    <h2>INVOICE</h2>
-                  </td>
+                  <td><h2>INVOICE</h2></td>
                   <td>
                     Date: ${date}<br>
                     Invoice #: ${Math.floor(Math.random() * 100000)}
@@ -138,27 +136,29 @@
         </table>
       `;
 
-      document.getElementById('invoiceOutput').innerHTML = html;
-      document.getElementById('invoiceOutput').style.display = 'block';
+      const output = document.getElementById('invoiceOutput');
+      output.innerHTML = html;
+      output.style.display = 'block';
+
       document.getElementById('downloadBtn').style.display = 'inline-block';
     }
 
-    
-  function downloadPDF() {
-    const element = document.getElementById('invoiceOutput');
+    function downloadPDF() {
+      const element = document.getElementById('invoiceOutput');
 
-    // Ensure it's visible and wait a moment before generating the PDF
-    setTimeout(() => {
-      const opt = {
-        margin:       0.5,
-        filename:     'invoice.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
+      // Delay to ensure layout is updated
+      setTimeout(() => {
+        const opt = {
+          margin:       0.5,
+          filename:     'invoice.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2 },
+          jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
 
-      html2pdf().set(opt).from(element).save();
-    }, 300); // Small delay for layout/render to complete
-  }
-</script>
-
+        html2pdf().set(opt).from(element).save();
+      }, 300);
+    }
+  </script>
+</body>
+</html>
